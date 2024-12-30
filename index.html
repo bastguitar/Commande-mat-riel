@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commande de matériel 2025</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Commande de matériel 2025</h1>
+    <select id="secouristeSelect">
+        <option value="">-- Sélectionner un secouriste --</option>
+    </select>
+    <div id="panierSummary">
+        <span id="panierIcon">🛒 PANIER (<span id="panierCount">0</span>)</span>
+        <span id="totalAmount">Total: 0€</span>
+        <span id="remainingAmount">Montant disponible: 0€</span>
+    </div>
+    <div id="commandeRecap"></div>
+    <div id="articleSelection">
+        <select id="articleSelect">
+            <option value="">-- Sélectionner votre article --</option>
+        </select>
+        <input type="text" id="tailleInput" placeholder="Taille">
+        <input type="text" id="couleurInput" placeholder="Couleur">
+        <input type="number" id="quantiteInput" placeholder="Quantité">
+        <button id="ajouterAuPanier">Ajouter au panier</button>
+    </div>
+    <div id="panierModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="panierContent"></div>
+            <button id="poursuivreCommande">Poursuivre sa commande</button>
+            <button id="validerPanier">Valider le panier</button>
+        </div>
+    </div>
+</body>
+</html>
