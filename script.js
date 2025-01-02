@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const validerPanier = document.getElementById('validerPanier');
 
     const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0'; // Remplace par l'ID de ton Google Sheet
-    const API_KEY = '40656995768-a0s1ccjr7f79ohti2sc2t10vm3lksblo.apps.googleusercontent.com'; // Ta clé API
+    const API_KEY = 'AIzaSyAqh7LmkWxSAjCJ51A5rvDVqhn3ut5Lyl8'; // Ta clé API
 
     let panier = [];
 
