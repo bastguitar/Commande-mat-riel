@@ -34,23 +34,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Charger les articles depuis Google Sheets
-    function chargerArticles() {
-        const range = 'Catalogue (lecture seule)!A4:I1000'; // Plage des articles
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+function chargerArticles() {
+    const range = 'Catalogue (lecture seule)!A4:I10'; // Plage réduite pour tester
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const articles = data.values;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Réponse de l\'API:', data); // Affiche la réponse complète
+            const articles = data.values;
+            if (articles) {
                 articles.forEach(article => {
                     const option = document.createElement('option');
                     option.value = article[0]; // Nom de l'article
                     option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     articleSelect.appendChild(option);
                 });
-            })
-            .catch(error => console.error('Erreur lors du chargement des articles:', error));
-    }
+            } else {
+                console.error('Aucune donnée trouvée dans la plage spécifiée.');
+            }
+        })
+        .catch(error => console.error('Erreur lors du chargement des articles:', error));
+}
 
     // Gérer la sélection d'un secouriste
     secouristeSelect.addEventListener('change', function() {
