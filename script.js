@@ -35,15 +35,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Charger les articles depuis Google Sheets
 function chargerArticles() {
-    const range = 'Catalogue (lecture seule)!A4:I10'; // Plage réduite pour tester
+    const range = 'Catalogue (lecture seule)!A4:I1000'; // Plage des articles
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
     fetch(url)
         .then(response => response.json())
         .then(data => {
             console.log('Réponse de l\'API:', data); // Affiche la réponse complète
-            const articles = data.values;
-            if (articles) {
+            if (data.values) {
+                const articles = data.values;
                 articles.forEach(article => {
                     const option = document.createElement('option');
                     option.value = article[0]; // Nom de l'article
