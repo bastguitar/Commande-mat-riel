@@ -103,24 +103,4 @@ document.addEventListener('DOMContentLoaded', function() {
         const sousTotalCalcul = (prix * quantite).toFixed(2);
 
         if (article && taille && couleur && quantite) {
-            // Ajouter l'article au panier
-            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-            panierCount.textContent = panier.length;
-
-            // Ajouter la commande à Google Sheets
-            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
-
-            // Mettre à jour l'affichage
-            afficherPanier();
-            mettreAJourMontants();
-
-            // Réinitialiser les champs
-            reinitialiserChamps();
-        }
-    });
-
-    // Afficher le panier
-    function afficherPanier() {
-        commandeRecap.innerHTML = panier.map((item, index) => `
-            <div>
-                ${item.article} - ${item.taille} - ${item.couleur} - ${item.quantite}
+           
