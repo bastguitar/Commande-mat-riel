@@ -4,19 +4,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const panierCount = document.getElementById('panierCount');
     const totalAmount = document.getElementById('totalAmount');
     const remainingAmount = document.getElementById('remainingAmount');
+    const montantOctroye = document.getElementById('montantOctroye');
     const commandeRecap = document.getElementById('commandeRecap');
-    const panierModal = document.getElementById('panierModal');
-    const panierContent = document.getElementById('panierContent');
-    const validerPanier = document.getElementById('validerPanier');
+    const quantiteInput = document.getElementById('quantiteInput');
+    const sousTotal = document.getElementById('sousTotal');
+    const ajouterAuPanier = document.getElementById('ajouterAuPanier');
+    const validerCommande = document.getElementById('validerCommande');
 
-    const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0'; // Remplace par l'ID de ton Google Sheet
-    const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0'; // Ta clé API
+    const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0';
+    const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
 
     let panier = [];
+    let montantInitial = 0;
 
-    // Charger les secouristes depuis Google Sheets
+    // Charger les secouristes
     function chargerSecouristes() {
-        const range = 'Attribution budget secouristes!B10:C36'; // Plage des secouristes
+        const range = 'Attribution budget secouristes!B10:C36';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
         fetch(url)
@@ -26,23 +29,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 secouristes.forEach(secouriste => {
                     const option = document.createElement('option');
                     option.value = secouriste[0]; // Nom du secouriste
-                    option.textContent = `${secouriste[0]} (${secouriste[1]}€)`;
+                    option.textContent = secouriste[0]; // Nom uniquement
                     secouristeSelect.appendChild(option);
                 });
             })
             .catch(error => console.error('Erreur lors du chargement des secouristes:', error));
     }
 
-    // Charger les articles depuis Google Sheets
-function chargerArticles() {
-    const range = 'Catalogue (lecture seule)!A4:I1000'; // Plage des articles
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+    // Charger les articles
+    function chargerArticles() {
+        const range = 'Catalogue (lecture seule)!A4:I1000';
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Réponse de l\'API:', data); // Affiche la réponse complète
-            if (data.values) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
                 const articles = data.values;
                 articles.forEach(article => {
                     const option = document.createElement('option');
@@ -50,100 +51,88 @@ function chargerArticles() {
                     option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     articleSelect.appendChild(option);
                 });
-            } else {
-                console.error('Aucune donnée trouvée dans la plage spécifiée.');
-            }
-        })
-        .catch(error => console.error('Erreur lors du chargement des articles:', error));
-}
-
-    // Gérer la sélection d'un secouriste
-    secouristeSelect.addEventListener('change', function() {
-        const secouriste = this.value;
-        if (secouriste) {
-            // Charger les commandes existantes pour ce secouriste
-            chargerCommandes(secouriste);
-        }
-    });
-
-    // Gérer l'ajout d'un article au panier
-    document.getElementById('ajouterAuPanier').addEventListener('click', function() {
-    const article = articleSelect.value;
-    const taille = document.getElementById('tailleInput').value;
-    const couleur = document.getElementById('couleurInput').value;
-    const quantite = document.getElementById('quantiteInput').value;
-
-    console.log('Article:', article);
-    console.log('Taille:', taille);
-    console.log('Couleur:', couleur);
-    console.log('Quantité:', quantite);
-
-    if (article && taille && couleur && quantite) {
-    panier.push({ article, taille, couleur, quantite });
-    console.log('Panier:', panier); // Affiche le panier dans la console
-    panierCount.textContent = panier.length;
-    ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite);
-	} else {
-        console.error('Tous les champs ne sont pas remplis.');
+            })
+            .catch(error => console.error('Erreur lors du chargement des articles:', error));
     }
-});
 
-    // Ouvrir/fermer le modal du panier
-    panierModal.querySelector('.close').addEventListener('click', function() {
-        panierModal.style.display = 'none';
-    });
+    // Mettre à jour le sous-total
+    function mettreAJourSousTotal() {
+        const article = articleSelect.value;
+        const quantite = parseInt(quantiteInput.value);
+        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+        const sousTotalCalcul = (prix * quantite).toFixed(2);
+        sousTotal.textContent = `Sous-total: ${sousTotalCalcul}€`;
+    }
 
-    // Valider le panier
-    validerPanier.addEventListener('click', function() {
-        if (confirm('Êtes-vous sûr de vouloir valider votre commande ? Il sera possible de la modifier ultérieurement.')) {
-            alert('Commande validée !');
-            window.location.href = 'https://sites.google.com/view/commande-materiel/briancon?authuser=0';
+    // Ajouter un article au panier
+    ajouterAuPanier.addEventListener('click', function() {
+        const article = articleSelect.value;
+        const taille = document.getElementById('tailleInput').value;
+        const couleur = document.getElementById('couleurInput').value;
+        const quantite = parseInt(quantiteInput.value);
+        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+        const sousTotalCalcul = (prix * quantite).toFixed(2);
+
+        if (article && taille && couleur && quantite) {
+            // Ajouter l'article au panier
+            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
+            panierCount.textContent = panier.length;
+
+            // Ajouter la commande à Google Sheets
+            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
+
+            // Mettre à jour l'affichage
+            afficherPanier();
+            mettreAJourMontants();
         }
     });
 
-    // Fonction pour charger les commandes existantes
-    function chargerCommandes(secouriste) {
-    const range = 'Commande!A2:G'; // Plage des commandes
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+    // Afficher le panier
+    function afficherPanier() {
+        commandeRecap.innerHTML = panier.map((item, index) => `
+            <div>
+                ${item.article} - ${item.taille} - ${item.couleur} - ${item.quantite} - ${item.sousTotal}€
+                <button onclick="supprimerArticle(${index})">🗑️</button>
+            </div>
+        `).join('');
+    }
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Réponse de l\'API pour les commandes:', data); // Affiche la réponse complète
-            if (data.values) {
-                const commandes = data.values.filter(commande => commande[0] === secouriste);
-                commandeRecap.innerHTML = commandes.map(commande => `
-                    <div>
-                        ${commande[1]} - ${commande[2]}€ - Taille: ${commande[3]} - Couleur: ${commande[4]} - Quantité: ${commande[5]} - Sous-total: ${commande[6]}€
-                    </div>
-                `).join('');
-            } else {
-                console.error('Aucune donnée trouvée dans la plage spécifiée.');
-            }
-        })
-        .catch(error => console.error('Erreur lors du chargement des commandes:', error));
-}
+    // Supprimer un article du panier
+    window.supprimerArticle = function(index) {
+        panier.splice(index, 1);
+        panierCount.textContent = panier.length;
+        afficherPanier();
+        mettreAJourMontants();
+    };
 
-    // Fonction pour ajouter une commande dans Google Sheets
-    function ajouterCommande(secouriste, article, taille, couleur, quantite) {
-    const range = 'Commande!A2:G'; // Plage des commandes
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    // Mettre à jour les montants (total et montant disponible)
+    function mettreAJourMontants() {
+        const total = panier.reduce((acc, item) => acc + parseFloat(item.sousTotal), 0);
+        totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
+        remainingAmount.textContent = `Montant disponible: ${(montantInitial - total).toFixed(2)}€`;
+    }
 
-    const values = [[secouriste, article, taille, couleur, quantite]];
-    const body = { values };
+    // Valider la commande
+    validerCommande.addEventListener('click', function() {
+        if (confirm('Êtes-vous sûr de valider votre commande ?')) {
+            alert('Commande validée !');
+            window.location.href = 'https://sites.google.com/view/commande-materiel/accueil?authuser=0';
+        }
+    });
 
-    console.log('Envoi de la commande:', body); // Affiche la commande dans la console
-
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    })
-    .then(response => response.json())
-    .then(data => console.log('Commande ajoutée:', data))
-    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-}
-
+    // Charger les données initiales
     chargerSecouristes();
     chargerArticles();
+
+    // Générer les options de quantité (1 à 50)
+    for (let i = 2; i <= 50; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        quantiteInput.appendChild(option);
+    }
+
+    // Mettre à jour le sous-total lorsque la quantité change
+    quantiteInput.addEventListener('change', mettreAJourSousTotal);
+    articleSelect.addEventListener('change', mettreAJourSousTotal);
 });

@@ -10,31 +10,29 @@
 </head>
 <body>
     <h1>Commande de matériel 2025</h1>
-    <select id="secouristeSelect">
-        <option value="">-- Sélectionner un secouriste --</option>
-    </select>
     <div id="panierSummary">
         <span id="panierIcon">🛒 PANIER (<span id="panierCount">0</span>)</span>
         <span id="totalAmount">Total: 0€</span>
         <span id="remainingAmount">Montant disponible: 0€</span>
     </div>
-    <div id="commandeRecap"></div>
+    <div id="montantOctroye"></div>
+    <select id="secouristeSelect">
+        <option value="">-- Sélectionnez un secouriste --</option>
+    </select>
     <div id="articleSelection">
         <select id="articleSelect">
-            <option value="">-- Sélectionner votre article --</option>
+            <option value="">-- Sélectionnez votre article --</option>
         </select>
         <input type="text" id="tailleInput" placeholder="Taille">
         <input type="text" id="couleurInput" placeholder="Couleur">
-        <input type="number" id="quantiteInput" placeholder="Quantité">
+        <select id="quantiteInput">
+            <option value="1">1</option>
+            <!-- Les options de 2 à 50 seront générées dynamiquement -->
+        </select>
+        <span id="sousTotal">Sous-total: 0€</span>
         <button id="ajouterAuPanier">Ajouter au panier</button>
     </div>
-    <div id="panierModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="panierContent"></div>
-            <button id="poursuivreCommande">Poursuivre sa commande</button>
-            <button id="validerPanier">Valider le panier</button>
-        </div>
-    </div>
+    <div id="commandeRecap"></div>
+    <button id="validerCommande" class="valider-button">VALIDER LA COMMANDE</button>
 </body>
 </html>
