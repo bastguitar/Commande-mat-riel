@@ -70,3 +70,17 @@ h1 {
 .valider-button:hover {
     background-color: darkred;
 }
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: none; /* Masqué par défaut */
+}
+
+#loading img {
+    width: 50px;
+    height: 50px;
+}

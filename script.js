@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sousTotal = document.getElementById('sousTotal');
     const ajouterAuPanier = document.getElementById('ajouterAuPanier');
     const validerCommande = document.getElementById('validerCommande');
+    const loading = document.getElementById('loading');
 
     const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0';
     const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
@@ -17,8 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let panier = [];
     let montantInitial = 0;
 
+    // Afficher le logo de chargement
+    function showLoading() {
+        loading.style.display = 'block';
+    }
+
+    // Masquer le logo de chargement
+    function hideLoading() {
+        loading.style.display = 'none';
+    }
+
     // Charger les secouristes
     function chargerSecouristes() {
+        showLoading(); // Afficher le logo
         const range = 'Attribution budget secouristes!B10:C36';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
@@ -32,12 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = secouriste[0]; // Nom uniquement
                     secouristeSelect.appendChild(option);
                 });
+                hideLoading(); // Masquer le logo une fois chargé
             })
-            .catch(error => console.error('Erreur lors du chargement des secouristes:', error));
+            .catch(error => {
+                console.error('Erreur lors du chargement des secouristes:', error);
+                hideLoading(); // Masquer le logo en cas d'erreur
+            });
     }
 
     // Charger les articles
     function chargerArticles() {
+        showLoading(); // Afficher le logo
         const range = 'Catalogue (lecture seule)!A4:I1000';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
@@ -51,8 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     articleSelect.appendChild(option);
                 });
+                hideLoading(); // Masquer le logo une fois chargé
             })
-            .catch(error => console.error('Erreur lors du chargement des articles:', error));
+            .catch(error => {
+                console.error('Erreur lors du chargement des articles:', error);
+                hideLoading(); // Masquer le logo en cas d'erreur
+            });
     }
 
     // Mettre à jour le sous-total
@@ -119,6 +140,24 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'https://sites.google.com/view/commande-materiel/accueil?authuser=0';
         }
     });
+
+    // Ajouter une commande à Google Sheets
+    function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
+        const range = 'Commande!A2:G'; // Plage des commandes
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+
+        const values = [[secouriste, article, taille, couleur, quantite, sousTotal]];
+        const body = { values };
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(response => response.json())
+        .then(data => console.log('Commande ajoutée:', data))
+        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+    }
 
     // Charger les données initiales
     chargerSecouristes();
