@@ -68,18 +68,25 @@ function chargerArticles() {
 
     // Gérer l'ajout d'un article au panier
     document.getElementById('ajouterAuPanier').addEventListener('click', function() {
-        const article = articleSelect.value;
-        const taille = document.getElementById('tailleInput').value;
-        const couleur = document.getElementById('couleurInput').value;
-        const quantite = document.getElementById('quantiteInput').value;
-        if (article && taille && couleur && quantite) {
-            // Ajouter l'article au panier
-            panier.push({ article, taille, couleur, quantite });
-            panierCount.textContent = panier.length;
-            // Mettre à jour le panier dans Google Sheets
-            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite);
-        }
-    });
+    const article = articleSelect.value;
+    const taille = document.getElementById('tailleInput').value;
+    const couleur = document.getElementById('couleurInput').value;
+    const quantite = document.getElementById('quantiteInput').value;
+
+    console.log('Article:', article);
+    console.log('Taille:', taille);
+    console.log('Couleur:', couleur);
+    console.log('Quantité:', quantite);
+
+    if (article && taille && couleur && quantite) {
+    panier.push({ article, taille, couleur, quantite });
+    console.log('Panier:', panier); // Affiche le panier dans la console
+    panierCount.textContent = panier.length;
+    ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite);
+	} else {
+        console.error('Tous les champs ne sont pas remplis.');
+    }
+});
 
     // Ouvrir/fermer le modal du panier
     panierModal.querySelector('.close').addEventListener('click', function() {
@@ -114,21 +121,23 @@ function chargerArticles() {
 
     // Fonction pour ajouter une commande dans Google Sheets
     function ajouterCommande(secouriste, article, taille, couleur, quantite) {
-        const range = 'Commande!A2:G'; // Plage des commandes
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    const range = 'Commande!A2:G'; // Plage des commandes
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille, couleur, quantite]];
-        const body = { values };
+    const values = [[secouriste, article, taille, couleur, quantite]];
+    const body = { values };
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        })
-        .then(response => response.json())
-        .then(data => console.log('Commande ajoutée:', data))
-        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-    }
+    console.log('Envoi de la commande:', body); // Affiche la commande dans la console
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+    .then(response => response.json())
+    .then(data => console.log('Commande ajoutée:', data))
+    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+}
 
     chargerSecouristes();
     chargerArticles();
