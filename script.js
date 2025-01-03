@@ -103,21 +103,26 @@ function chargerArticles() {
 
     // Fonction pour charger les commandes existantes
     function chargerCommandes(secouriste) {
-        const range = 'Commande!A2:G'; // Plage des commandes
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+    const range = 'Commande!A2:G'; // Plage des commandes
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Réponse de l\'API pour les commandes:', data); // Affiche la réponse complète
+            if (data.values) {
                 const commandes = data.values.filter(commande => commande[0] === secouriste);
                 commandeRecap.innerHTML = commandes.map(commande => `
                     <div>
                         ${commande[1]} - ${commande[2]}€ - Taille: ${commande[3]} - Couleur: ${commande[4]} - Quantité: ${commande[5]} - Sous-total: ${commande[6]}€
                     </div>
                 `).join('');
-            })
-            .catch(error => console.error('Erreur lors du chargement des commandes:', error));
-    }
+            } else {
+                console.error('Aucune donnée trouvée dans la plage spécifiée.');
+            }
+        })
+        .catch(error => console.error('Erreur lors du chargement des commandes:', error));
+}
 
     // Fonction pour ajouter une commande dans Google Sheets
     function ajouterCommande(secouriste, article, taille, couleur, quantite) {
