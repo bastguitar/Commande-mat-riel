@@ -28,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function() {
         loading.style.display = 'none';
     }
 
+    // Réinitialiser les champs de sélection d'article
+    function reinitialiserChamps() {
+        document.getElementById('tailleInput').value = '';
+        document.getElementById('couleurInput').value = '';
+        document.getElementById('quantiteInput').value = 1;
+        sousTotal.textContent = 'Sous-total: 0€';
+    }
+
     // Charger les secouristes
     function chargerSecouristes() {
         showLoading(); // Afficher le logo
@@ -105,6 +113,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mettre à jour l'affichage
             afficherPanier();
             mettreAJourMontants();
+
+            // Réinitialiser les champs
+            reinitialiserChamps();
         }
     });
 
@@ -112,66 +123,4 @@ document.addEventListener('DOMContentLoaded', function() {
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
             <div>
-                ${item.article} - ${item.taille} - ${item.couleur} - ${item.quantite} - ${item.sousTotal}€
-                <button onclick="supprimerArticle(${index})">🗑️</button>
-            </div>
-        `).join('');
-    }
-
-    // Supprimer un article du panier
-    window.supprimerArticle = function(index) {
-        panier.splice(index, 1);
-        panierCount.textContent = panier.length;
-        afficherPanier();
-        mettreAJourMontants();
-    };
-
-    // Mettre à jour les montants (total et montant disponible)
-    function mettreAJourMontants() {
-        const total = panier.reduce((acc, item) => acc + parseFloat(item.sousTotal), 0);
-        totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
-        remainingAmount.textContent = `Montant disponible: ${(montantInitial - total).toFixed(2)}€`;
-    }
-
-    // Valider la commande
-    validerCommande.addEventListener('click', function() {
-        if (confirm('Êtes-vous sûr de valider votre commande ?')) {
-            alert('Commande validée !');
-            window.location.href = 'https://sites.google.com/view/commande-materiel/accueil?authuser=0';
-        }
-    });
-
-    // Ajouter une commande à Google Sheets
-    function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
-        const range = 'Commande!A2:G'; // Plage des commandes
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-
-        const values = [[secouriste, article, taille, couleur, quantite, sousTotal]];
-        const body = { values };
-
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        })
-        .then(response => response.json())
-        .then(data => console.log('Commande ajoutée:', data))
-        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-    }
-
-    // Charger les données initiales
-    chargerSecouristes();
-    chargerArticles();
-
-    // Générer les options de quantité (1 à 50)
-    for (let i = 2; i <= 50; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        quantiteInput.appendChild(option);
-    }
-
-    // Mettre à jour le sous-total lorsque la quantité change
-    quantiteInput.addEventListener('change', mettreAJourSousTotal);
-    articleSelect.addEventListener('change', mettreAJourSousTotal);
-});
+                ${item.article} - ${item.taille} - ${item.couleur} - ${item.quantite}
