@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Ajouter une commande à Google Sheets
-    function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
+   function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
     const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
