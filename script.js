@@ -102,13 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
     const sousTotalCalcul = (prix * quantite).toFixed(2);
 
-    console.log('Article:', article);
-    console.log('Taille:', taille);
-    console.log('Couleur:', couleur);
-    console.log('Quantité:', quantite);
-
-    if (article && taille && couleur && quantite) {
-        // Ajouter l'article au panier
+    if (article && quantite) { // Vérifiez uniquement l'article et la quantité
         panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
         panierCount.textContent = panier.length;
 
@@ -122,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Réinitialiser les champs
         reinitialiserChamps();
     } else {
-        console.log('Un ou plusieurs champs sont vides');
+        console.log('L\'article et la quantité sont obligatoires');
     }
 });
 
