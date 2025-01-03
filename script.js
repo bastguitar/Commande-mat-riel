@@ -170,6 +170,69 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
     }
 
+    // Charger le montant octroyé pour un secouriste
+    function chargerMontantOctroye(secouriste) {
+        const range = 'Attribution budget secouristes!B10:C36';
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const secouristes = data.values;
+                const secouristeTrouve = secouristes.find(s => s[0] === secouriste);
+                if (secouristeTrouve) {
+                    montantInitial = parseFloat(secouristeTrouve[1]); // Montant octroyé
+                    montantOctroye.textContent = `Montant octroyé: ${montantInitial.toFixed(2)}€`;
+                    mettreAJourMontants(); // Mettre à jour le montant disponible
+                }
+            })
+            .catch(error => console.error('Erreur lors du chargement du montant octroyé:', error));
+    }
+
+    // Gérer la sélection d'un secouriste
+    secouristeSelect.addEventListener('change', function() {
+        const secouriste = this.value;
+        if (secouriste) {
+            // Charger le montant octroyé pour ce secouriste
+            chargerMontantOctroye(secouriste);
+            // Charger les commandes existantes pour ce secouriste
+            chargerCommandes(secouriste);
+        } else {
+            // Réinitialiser les valeurs si aucun secouriste n'est sélectionné
+            montantOctroye.textContent = '';
+            panier = [];
+            panierCount.textContent = 0;
+            totalAmount.textContent = 'Total: 0€';
+            remainingAmount.textContent = 'Montant disponible: 0€';
+            commandeRecap.innerHTML = '';
+        }
+    });
+
+    // Charger les commandes existantes pour un secouriste
+    function chargerCommandes(secouriste) {
+        const range = 'Commande!A2:G';
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.values) {
+                    const commandes = data.values.filter(commande => commande[0] === secouriste);
+                    panier = commandes.map(commande => ({
+                        article: commande[1],
+                        taille: commande[2],
+                        couleur: commande[3],
+                        quantite: parseInt(commande[4]),
+                        sousTotal: parseFloat(commande[5])
+                    }));
+                    panierCount.textContent = panier.length;
+                    afficherPanier();
+                    mettreAJourMontants();
+                }
+            })
+            .catch(error => console.error('Erreur lors du chargement des commandes:', error));
+    }
+
     // Charger les données initiales
     chargerSecouristes();
     chargerArticles();
