@@ -155,21 +155,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ajouter une commande à Google Sheets
     function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
-        const range = 'Commande!A2:G'; // Plage des commandes
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
-        const body = { values };
+    const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
+    const body = { values };
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        })
-        .then(response => response.json())
-        .then(data => console.log('Commande ajoutée:', data))
-        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-    }
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => console.log('Commande ajoutée:', data))
+    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+}
 
     // Charger le montant octroyé pour un secouriste
     function chargerMontantOctroye(secouriste) {
