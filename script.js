@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Charger les secouristes
     function chargerSecouristes() {
-        showLoading(); // Afficher le logo
+        showLoading();
         const range = 'Attribution budget secouristes!B10:C36';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
@@ -52,17 +52,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = secouriste[0]; // Nom uniquement
                     secouristeSelect.appendChild(option);
                 });
-                hideLoading(); // Masquer le logo une fois chargé
+                hideLoading();
             })
             .catch(error => {
                 console.error('Erreur lors du chargement des secouristes:', error);
-                hideLoading(); // Masquer le logo en cas d'erreur
+                hideLoading();
             });
     }
 
     // Charger les articles
     function chargerArticles() {
-        showLoading(); // Afficher le logo
+        showLoading();
         const range = 'Catalogue (lecture seule)!A4:I1000';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
@@ -76,11 +76,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     articleSelect.appendChild(option);
                 });
-                hideLoading(); // Masquer le logo une fois chargé
+                hideLoading();
             })
             .catch(error => {
                 console.error('Erreur lors du chargement des articles:', error);
-                hideLoading(); // Masquer le logo en cas d'erreur
+                hideLoading();
             });
     }
 
@@ -95,36 +95,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ajouter un article au panier
     ajouterAuPanier.addEventListener('click', function() {
-    const article = articleSelect.value;
-    const taille = document.getElementById('tailleInput').value;
-    const couleur = document.getElementById('couleurInput').value;
-    const quantite = parseInt(quantiteInput.value);
-    const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
-    const sousTotalCalcul = (prix * quantite).toFixed(2);
+        const article = articleSelect.value;
+        const taille = document.getElementById('tailleInput').value;
+        const couleur = document.getElementById('couleurInput').value;
+        const quantite = parseInt(quantiteInput.value);
+        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+        const sousTotalCalcul = (prix * quantite).toFixed(2);
 
-    if (article && quantite) { // Vérifiez uniquement l'article et la quantité
-        panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-        panierCount.textContent = panier.length;
+        if (article && quantite) { // Vérifiez uniquement l'article et la quantité
+            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
+            panierCount.textContent = panier.length;
 
-        // Ajouter la commande à Google Sheets
-        ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
+            // Ajouter la commande à Google Sheets
+            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
 
-        // Mettre à jour l'affichage
-        afficherPanier();
-        mettreAJourMontants();
+            // Mettre à jour l'affichage
+            afficherPanier();
+            mettreAJourMontants();
 
-        // Réinitialiser les champs
-        reinitialiserChamps();
-    } else {
-        console.log('L\'article et la quantité sont obligatoires');
-    }
-});
+            // Réinitialiser les champs
+            reinitialiserChamps();
+        } else {
+            console.log('L\'article et la quantité sont obligatoires');
+        }
+    });
 
     // Afficher le panier
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
             <div>
-                ${item.article} - ${item.taille} - ${item.couleur} - ${item.quantite} - ${item.sousTotal}€
+                ${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal}€
                 <button onclick="supprimerArticle(${index})">🗑️</button>
             </div>
         `).join('');
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const range = 'Commande!A2:G'; // Plage des commandes
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille, couleur, quantite, sousTotal]];
+        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
         const body = { values };
 
         fetch(url, {
@@ -194,12 +194,9 @@ document.addEventListener('DOMContentLoaded', function() {
     secouristeSelect.addEventListener('change', function() {
         const secouriste = this.value;
         if (secouriste) {
-            // Charger le montant octroyé pour ce secouriste
             chargerMontantOctroye(secouriste);
-            // Charger les commandes existantes pour ce secouriste
             chargerCommandes(secouriste);
         } else {
-            // Réinitialiser les valeurs si aucun secouriste n'est sélectionné
             montantOctroye.textContent = '';
             panier = [];
             panierCount.textContent = 0;
