@@ -95,29 +95,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ajouter un article au panier
     ajouterAuPanier.addEventListener('click', function() {
-        const article = articleSelect.value;
-        const taille = document.getElementById('tailleInput').value;
-        const couleur = document.getElementById('couleurInput').value;
-        const quantite = parseInt(quantiteInput.value);
-        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
-        const sousTotalCalcul = (prix * quantite).toFixed(2);
+    const article = articleSelect.value;
+    const taille = document.getElementById('tailleInput').value;
+    const couleur = document.getElementById('couleurInput').value;
+    const quantite = parseInt(quantiteInput.value);
+    const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+    const sousTotalCalcul = (prix * quantite).toFixed(2);
 
-        if (article && taille && couleur && quantite) {
-            // Ajouter l'article au panier
-            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-            panierCount.textContent = panier.length;
+    console.log('Article:', article);
+    console.log('Taille:', taille);
+    console.log('Couleur:', couleur);
+    console.log('Quantité:', quantite);
 
-            // Ajouter la commande à Google Sheets
-            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
+    if (article && taille && couleur && quantite) {
+        // Ajouter l'article au panier
+        panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
+        panierCount.textContent = panier.length;
 
-            // Mettre à jour l'affichage
-            afficherPanier();
-            mettreAJourMontants();
+        // Ajouter la commande à Google Sheets
+        ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
 
-            // Réinitialiser les champs
-            reinitialiserChamps();
-        }
-    });
+        // Mettre à jour l'affichage
+        afficherPanier();
+        mettreAJourMontants();
+
+        // Réinitialiser les champs
+        reinitialiserChamps();
+    } else {
+        console.log('Un ou plusieurs champs sont vides');
+    }
+});
 
     // Afficher le panier
     function afficherPanier() {
