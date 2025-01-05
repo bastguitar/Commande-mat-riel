@@ -89,27 +89,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     ajouterAuPanier.addEventListener('click', function() {
-        const article = articleSelect.value.split(' - ')[0]; // Extract article name
-        const taille = document.getElementById('tailleInput').value;
-        const couleur = document.getElementById('couleurInput').value;
-        const quantite = parseInt(quantiteInput.value);
-        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.')); // Extract and parse price
-        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
+  // Récupérer les données du formulaire
+  const secouriste = secouristeSelect.value;
+  const article = articleSelect.value.split(' - ')[0];
+  const taille = document.getElementById('tailleInput').value;
+  const couleur = document.getElementById('couleurInput').value;
+  const quantite = parseInt(quantiteInput.value);
+  const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
+  const sousTotal = prix * quantite;
 
-        if (article && quantite) {
-            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-            panierCount.textContent = panier.length;
+  // Ajouter l'article au panier
+  panier.push({
+    secouriste,
+    article,
+    taille,
+    couleur,
+    quantite,
+    sousTotal
+  });
 
-            ajouterCommande(secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
+  // Mettre à jour l'affichage du panier et les totaux
+  afficherPanier();
+  mettreAJourMontants();
 
-            afficherPanier();
-            mettreAJourMontants();
+  // Réinitialiser le formulaire
+  reinitialiserChamps();
 
-            reinitialiserChamps();
-        } else {
-            console.log('L\'article et la quantité sont obligatoires');
-        }
-    });
+  // Appeler la fonction Google Apps Script pour enregistrer la commande
+  const url = 'https://script.google.com/macros/s/TON_ID_SCRIPT/exec'; // Remplacer par l'ID de ton script
+  const params = {
+    secouriste,
+    article,
+    taille,
+    couleur,
+    prix,
+    quantite,
+    sousTotal
+  };
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(params)
+  })
+  .then(response => {
+    if (!response.ok) {
+      console.error('Erreur lors de l\'ajout de la commande:', response);
+    } else {
+      console.log('Commande ajoutée avec succès');
+    }
+  })
+  .catch(error => console.error('Erreur:', error));
+});
 
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
