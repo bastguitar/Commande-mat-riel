@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commande Secouristes</title>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Commande Secouristes</h1>
+    <div>
+        <label for="secouristeSelect">Sélectionnez un secouriste :</label>
+        <select id="secouristeSelect">
+            <option value="">--Sélectionnez--</option>
+            <!-- Options seront ajoutées dynamiquement -->
+        </select>
+    </div>
+    <div>
+        <label for="articleSelect">Sélectionnez un article :</label>
+        <select id="articleSelect">
+            <option value="">--Sélectionnez--</option>
+            <!-- Options seront ajoutées dynamiquement -->
+        </select>
+    </div>
+    <div>
+        <label for="quantiteInput">Quantité :</label>
+        <input type="number" id="quantiteInput" value="1" min="1">
+    </div>
+    <button id="ajouterAuPanier">Ajouter au panier</button>
+    <h2>Panier</h2>
+    <div id="commandeRecap"></div>
+    <button id="validerCommande">Valider la commande</button>
+</body>
+</html>
