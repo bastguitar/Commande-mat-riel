@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function mettreAJourSousTotal() {
         const article = articleSelect.value;
         const quantite = parseInt(quantiteInput.value);
-        const prix = parseFloat(article.split(' - ')[1].replace('€', '')); // Extraire le prix et le convertir en nombre
+        const prix = parseFloat(article.split(' - ')[1].replace('€', '').replace(',', '.')); // Extraire le prix et le convertir en nombre
         const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
         sousTotal.textContent = `Sous-total: ${sousTotalCalcul.toFixed(2)}€`;
     }
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const taille = document.getElementById('tailleInput').value;
         const couleur = document.getElementById('couleurInput').value;
         const quantite = parseInt(quantiteInput.value);
-        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '')); // Extract and parse price
+        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.')); // Extract and parse price
         const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
 
         if (article && quantite) {
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const secouristes = data.values;
                 const secouristeTrouve = secouristes.find(s => s[0] === secouriste);
                 if (secouristeTrouve) {
-                    montantInitial = parseFloat(secouristeTrouve[1]); // Montant octroyé
+                    montantInitial = parseFloat(secouristeTrouve[1].replace(',', '.')); // Montant octroyé
                     montantOctroye.textContent = `Montant octroyé: ${montantInitial.toFixed(2)}€`;
                     mettreAJourMontants(); // Mettre à jour le montant disponible
                 }
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         taille: commande[2],
                         couleur: commande[3],
                         quantite: parseInt(commande[4]),
-                        sousTotal: parseFloat(commande[5])
+                        sousTotal: parseFloat(commande[5].replace(',', '.'))
                     }));
                     panierCount.textContent = panier.length;
                     afficherPanier();
