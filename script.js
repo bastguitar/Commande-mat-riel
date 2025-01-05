@@ -93,24 +93,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function ajouterAuPanier() {
-        const article = DOMElements.articleSelect.value.split(' - ')[0];
-        const taille = DOMElements.tailleInput.value;
-        const couleur = DOMElements.couleurInput.value;
-        const quantite = parseInt(DOMElements.quantiteInput.value);
-        const prix = parseFloat(DOMElements.articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
-        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
+    const article = DOMElements.articleSelect.value.split(' - ')[0];
+    const taille = DOMElements.tailleInput.value;
+    const couleur = DOMElements.couleurInput.value;
+    const quantite = parseInt(DOMElements.quantiteInput.value);
+    const prix = parseFloat(DOMElements.articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
+    const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
 
-        if (article && quantite) {
-            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-            DOMElements.panierCount.textContent = panier.length;
-            ajouterCommande(DOMElements.secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
-            afficherPanier();
-            mettreAJourMontants();
-            reinitialiserChamps();
-        } else {
-            console.log('L\'article et la quantité sont obligatoires');
-        }
+    if (article && quantite) {
+        panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
+        DOMElements.panierCount.textContent = panier.length;
+        savePanier(DOMElements.secouristeSelect.value, panier); // Sauvegarder le panier dans le localStorage
+        ajouterCommande(DOMElements.secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
+        afficherPanier();
+        mettreAJourMontants();
+        reinitialiserChamps();
+    } else {
+        console.log('L\'article et la quantité sont obligatoires');
     }
+}
 
     function afficherPanier() {
         DOMElements.commandeRecap.innerHTML = panier.map((item, index) => `
@@ -211,20 +212,21 @@ document.addEventListener('DOMContentLoaded', function() {
     DOMElements.ajouterAuPanier.addEventListener('click', ajouterAuPanier);
     DOMElements.validerCommande.addEventListener('click', validerCommande);
     DOMElements.secouristeSelect.addEventListener('change', function() {
-        const secouriste = this.value;
-        if (secouriste) {
-            chargerMontantOctroye(secouriste);
-            chargerCommandes(secouriste);
-        } else {
-            DOMElements.montantOctroye.textContent = '';
-            panier = [];
-            DOMElements.panierCount.textContent = 0;
-            DOMElements.totalAmount.textContent = 'Total: 0€';
-            DOMElements.remainingAmount.textContent = 'Montant disponible: 0€';
-            DOMElements.remainingAmount.className = '';
-            DOMElements.commandeRecap.innerHTML = '';
-        }
-    });
+    const secouriste = this.value;
+    if (secouriste) {
+        panier = loadPanier(secouriste); // Charger le panier depuis le localStorage
+        chargerMontantOctroye(secouriste);
+        chargerCommandes(secouriste);
+    } else {
+        DOMElements.montantOctroye.textContent = '';
+        panier = [];
+        DOMElements.panierCount.textContent = 0;
+        DOMElements.totalAmount.textContent = 'Total: 0€';
+        DOMElements.remainingAmount.textContent = 'Montant disponible: 0€';
+        DOMElements.remainingAmount.className = '';
+        DOMElements.commandeRecap.innerHTML = '';
+    }
+});
 
     for (let i = 2; i <= 50; i++) {
         const option = document.createElement('option');
@@ -239,3 +241,14 @@ document.addEventListener('DOMContentLoaded', function() {
     chargerSecouristes();
     chargerArticles();
 });
+
+// Fonction pour sauvegarder le panier dans le localStorage
+function savePanier(secouriste, panier) {
+    localStorage.setItem(secouriste, JSON.stringify(panier));
+}
+
+// Fonction pour charger le panier depuis le localStorage
+function loadPanier(secouriste) {
+    const panier = localStorage.getItem(secouriste);
+    return panier ? JSON.parse(panier) : [];
+}

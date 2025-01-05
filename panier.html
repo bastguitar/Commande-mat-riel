@@ -1,34 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commande Secouristes</title>
-    <script src="script.js" defer></script>
+    <title>Panier des secouristes</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const secouriste = params.get('secouriste');
+            const panier = JSON.parse(localStorage.getItem(secouriste)) || [];
+
+            document.getElementById('panierContent').innerHTML = panier.map(item => `
+                <div>${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal.toFixed(2)}€</div>
+            `).join('');
+        });
+    </script>
 </head>
 <body>
-    <h1>Commande Secouristes</h1>
-    <div>
-        <label for="secouristeSelect">Sélectionnez un secouriste :</label>
-        <select id="secouristeSelect">
-            <option value="">--Sélectionnez--</option>
-            <!-- Options seront ajoutées dynamiquement -->
-        </select>
-    </div>
-    <div>
-        <label for="articleSelect">Sélectionnez un article :</label>
-        <select id="articleSelect">
-            <option value="">--Sélectionnez--</option>
-            <!-- Options seront ajoutées dynamiquement -->
-        </select>
-    </div>
-    <div>
-        <label for="quantiteInput">Quantité :</label>
-        <input type="number" id="quantiteInput" value="1" min="1">
-    </div>
-    <button id="ajouterAuPanier">Ajouter au panier</button>
-    <h2>Panier</h2>
-    <div id="commandeRecap"></div>
-    <button id="validerCommande">Valider la commande</button>
+    <h1>Panier de <span id="secouristeName"></span></h1>
+    <div id="panierContent"></div>
 </body>
 </html>
