@@ -18,25 +18,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let panier = [];
     let montantInitial = 0;
 
-    // Afficher le logo de chargement
     function showLoading() {
         loading.style.display = 'block';
     }
 
-    // Masquer le logo de chargement
     function hideLoading() {
         loading.style.display = 'none';
     }
 
-    // Réinitialiser les champs de sélection d'article
     function reinitialiserChamps() {
         document.getElementById('tailleInput').value = '';
         document.getElementById('couleurInput').value = '';
         document.getElementById('quantiteInput').value = 1;
         sousTotal.textContent = 'Sous-total: 0€';
+        articleSelect.selectedIndex = 0;  // Reset article selection
     }
 
-    // Charger les secouristes
     function chargerSecouristes() {
         showLoading();
         const range = 'Attribution budget secouristes!B10:C36';
@@ -60,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Charger les articles
     function chargerArticles() {
         showLoading();
         const range = 'Catalogue (lecture seule)!A4:I1000';
@@ -84,43 +80,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Mettre à jour le sous-total
     function mettreAJourSousTotal() {
         const article = articleSelect.value;
         const quantite = parseInt(quantiteInput.value);
         const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
-        const sousTotalCalcul = (prix * quantite).toFixed(2);
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
         sousTotal.textContent = `Sous-total: ${sousTotalCalcul}€`;
     }
 
-    // Ajouter un article au panier
     ajouterAuPanier.addEventListener('click', function() {
         const article = articleSelect.value;
         const taille = document.getElementById('tailleInput').value;
         const couleur = document.getElementById('couleurInput').value;
         const quantite = parseInt(quantiteInput.value);
         const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
-        const sousTotalCalcul = (prix * quantite).toFixed(2);
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
 
-        if (article && quantite) { // Vérifiez uniquement l'article et la quantité
+        if (article && quantite) {
             panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
             panierCount.textContent = panier.length;
 
-            // Ajouter la commande à Google Sheets
             ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
 
-            // Mettre à jour l'affichage
             afficherPanier();
             mettreAJourMontants();
 
-            // Réinitialiser les champs
             reinitialiserChamps();
         } else {
             console.log('L\'article et la quantité sont obligatoires');
         }
     });
 
-    // Afficher le panier
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
             <div>
@@ -130,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
     }
 
-    // Supprimer un article du panier
     window.supprimerArticle = function(index) {
         panier.splice(index, 1);
         panierCount.textContent = panier.length;
@@ -138,14 +127,14 @@ document.addEventListener('DOMContentLoaded', function() {
         mettreAJourMontants();
     };
 
-    // Mettre à jour les montants (total et montant disponible)
     function mettreAJourMontants() {
         const total = panier.reduce((acc, item) => acc + parseFloat(item.sousTotal), 0);
         totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
-        remainingAmount.textContent = `Montant disponible: ${(montantInitial - total).toFixed(2)}€`;
+        const remaining = montantInitial - total;
+        remainingAmount.textContent = `Montant disponible: ${remaining.toFixed(2)}€`;
+        remainingAmount.className = remaining >= 0 ? 'positive' : 'negative';  // Apply class based on amount
     }
 
-    // Valider la commande
     validerCommande.addEventListener('click', function() {
         if (confirm('Êtes-vous sûr de valider votre commande ?')) {
             alert('Commande validée !');
@@ -153,30 +142,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Ajouter une commande à Google Sheets
-   function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
-    const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
+        const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-    const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
-    const body = { values };
+        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
+        const body = { values };
 
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => console.log('Commande ajoutée:', data))
-    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-}
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => console.log('Commande ajoutée:', data))
+        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+    }
 
-    // Charger le montant octroyé pour un secouriste
     function chargerMontantOctroye(secouriste) {
         const range = 'Attribution budget secouristes!B10:C36';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
@@ -195,7 +182,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Erreur lors du chargement du montant octroyé:', error));
     }
 
-    // Gérer la sélection d'un secouriste
     secouristeSelect.addEventListener('change', function() {
         const secouriste = this.value;
         if (secouriste) {
@@ -207,11 +193,11 @@ document.addEventListener('DOMContentLoaded', function() {
             panierCount.textContent = 0;
             totalAmount.textContent = 'Total: 0€';
             remainingAmount.textContent = 'Montant disponible: 0€';
+            remainingAmount.className = '';  // Reset class
             commandeRecap.innerHTML = '';
         }
     });
 
-    // Charger les commandes existantes pour un secouriste
     function chargerCommandes(secouriste) {
         const range = 'Commande!A2:G';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
@@ -236,11 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Erreur lors du chargement des commandes:', error));
     }
 
-    // Charger les données initiales
     chargerSecouristes();
     chargerArticles();
 
-    // Générer les options de quantité (1 à 50)
     for (let i = 2; i <= 50; i++) {
         const option = document.createElement('option');
         option.value = i;
@@ -248,10 +232,8 @@ document.addEventListener('DOMContentLoaded', function() {
         quantiteInput.appendChild(option);
     }
 
-    // Mettre à jour le sous-total lorsque la quantité change
     quantiteInput.addEventListener('change', mettreAJourSousTotal);
     articleSelect.addEventListener('change', mettreAJourSousTotal);
 
-    // Réinitialiser les champs au chargement de la page
     reinitialiserChamps();
 });
