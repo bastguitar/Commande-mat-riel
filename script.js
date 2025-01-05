@@ -1,5 +1,5 @@
-const CLIENT_ID = '40656995768-a0s1ccjr7f79ohti2sc2t10vm3lksblo.apps.googleusercontent.com ';
-const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
+const CLIENT_ID = '655084183168-nfgsba3c23gg9ubfdfls7s54bs7eo51e.apps.googleusercontent.com ';
+const API_KEY = 'AIzaSyDSv0a9wsPN93J2EwnVVgBR7UGvr478_mI';
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0';
 
