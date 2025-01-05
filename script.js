@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
   reinitialiserChamps();
 
   // Appeler la fonction Google Apps Script pour enregistrer la commande
-  const url = 'https://script.google.com/macros/s/AKfycbzzM_dYWv2X2AGTMRnmC4MRTtV6hP455JY6wkGkP0YL13dY0iqhXEcSZ0oxzVVve-sn0w/exec'; // Remplacer par l'ID de ton script
+  const url = 'https://script.google.com/macros/s/AKfycbyX9Sc-LlJBl2pwNZorLXFgwU47KIjIiV2qA1PSjLTsZp4SrOYaEOFpsYHRA7WIQhsvyg/exec'; // Remplacer par l'ID de ton script
   const params = {
     secouriste,
     article,
