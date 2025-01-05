@@ -84,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const article = articleSelect.value;
         const quantite = parseInt(quantiteInput.value);
         const prix = parseFloat(article.split(' - ')[1].replace('€', '')); // Extraire le prix et le convertir en nombre
-        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
-        sousTotal.textContent = `Sous-total: ${sousTotalCalcul}€`;
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
+        sousTotal.textContent = `Sous-total: ${sousTotalCalcul.toFixed(2)}€`;
     }
 
     ajouterAuPanier.addEventListener('click', function() {
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const couleur = document.getElementById('couleurInput').value;
         const quantite = parseInt(quantiteInput.value);
         const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '')); // Extract and parse price
-        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
 
         if (article && quantite) {
             panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
             <div>
-                ${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal}€
+                ${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal.toFixed(2)}€
                 <button onclick="supprimerArticle(${index})">🗑️</button>
             </div>
         `).join('');
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
+        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal.toFixed(2)]];
         const body = { values };
 
         fetch(url, {
