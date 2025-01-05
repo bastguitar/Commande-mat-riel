@@ -9,13 +9,10 @@
             const params = new URLSearchParams(window.location.search);
             const secouriste = params.get('secouriste');
 
-            // Afficher le nom du secouriste
             document.getElementById('secouristeName').textContent = secouriste;
 
-            // Charger le panier depuis le localStorage
             const panier = JSON.parse(localStorage.getItem(secouriste)) || [];
 
-            // Vérifiez si le panier est vide
             if (panier.length === 0) {
                 document.getElementById('panierContent').innerHTML = '<p>Le panier est vide.</p>';
                 return;
@@ -25,7 +22,6 @@
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
 
-            // Add table headers
             thead.innerHTML = `
                 <tr>
                     <th>Article</th>
@@ -36,7 +32,6 @@
                 </tr>
             `;
 
-            // Add table rows
             panier.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
