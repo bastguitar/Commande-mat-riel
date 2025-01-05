@@ -1,48 +1,74 @@
+const CLIENT_ID = '40656995768-a0s1ccjr7f79ohti2sc2t10vm3lksblo.apps.googleusercontent.com ';
+const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
+const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0';
+
+function initClient() {
+    gapi.client.init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+        scope: SCOPES
+    }).then(function () {
+        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    }, function(error) {
+        console.error('Error initializing GAPI client:', error);
+    });
+}
+
+function handleClientLoad() {
+    gapi.load('client:auth2', initClient);
+}
+
+function updateSigninStatus(isSignedIn) {
+    if (isSignedIn) {
+        console.log('User signed in');
+    } else {
+        gapi.auth2.getAuthInstance().signIn();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const SPREADSHEET_ID = '11xIyQeUcBxNqM3jIBcEJzIqxWaq58eKHc2Yruxejiu0';
-    const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
-    
-    const DOMElements = {
-        secouristeSelect: document.getElementById('secouristeSelect'),
-        articleSelect: document.getElementById('articleSelect'),
-        panierCount: document.getElementById('panierCount'),
-        totalAmount: document.getElementById('totalAmount'),
-        remainingAmount: document.getElementById('remainingAmount'),
-        montantOctroye: document.getElementById('montantOctroye'),
-        commandeRecap: document.getElementById('commandeRecap'),
-        quantiteInput: document.getElementById('quantiteInput'),
-        sousTotal: document.getElementById('sousTotal'),
-        ajouterAuPanier: document.getElementById('ajouterAuPanier'),
-        validerCommande: document.getElementById('validerCommande'),
-        loading: document.getElementById('loading'),
-        tailleInput: document.getElementById('tailleInput'),
-        couleurInput: document.getElementById('couleurInput')
-    };
+
+    const secouristeSelect = document.getElementById('secouristeSelect');
+    const articleSelect = document.getElementById('articleSelect');
+    const panierCount = document.getElementById('panierCount');
+    const totalAmount = document.getElementById('totalAmount');
+    const remainingAmount = document.getElementById('remainingAmount');
+    const montantOctroye = document.getElementById('montantOctroye');
+    const commandeRecap = document.getElementById('commandeRecap');
+    const quantiteInput = document.getElementById('quantiteInput');
+    const sousTotal = document.getElementById('sousTotal');
+    const ajouterAuPanier = document.getElementById('ajouterAuPanier');
+    const validerCommande = document.getElementById('validerCommande');
+    const loading = document.getElementById('loading');
+    const tailleInput = document.getElementById('tailleInput');
+    const couleurInput = document.getElementById('couleurInput');
 
     let panier = [];
     let montantInitial = 0;
 
     function showLoading() {
-        DOMElements.loading.style.display = 'block';
+        loading.style.display = 'block';
     }
 
     function hideLoading() {
-        DOMElements.loading.style.display = 'none';
+        loading.style.display = 'none';
     }
 
     function reinitialiserChamps() {
-        DOMElements.tailleInput.value = '';
-        DOMElements.couleurInput.value = '';
-        DOMElements.quantiteInput.value = 1;
-        DOMElements.sousTotal.textContent = 'Sous-total: 0€';
-        DOMElements.articleSelect.selectedIndex = 0;
+        tailleInput.value = '';
+        couleurInput.value = '';
+        quantiteInput.value = 1;
+        sousTotal.textContent = 'Sous-total: 0€';
+        articleSelect.selectedIndex = 0;
     }
 
     function chargerSecouristes() {
         showLoading();
         const range = 'Attribution budget secouristes!B10:C36';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-        
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -51,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const option = document.createElement('option');
                     option.value = secouriste[0];
                     option.textContent = secouriste[0];
-                    DOMElements.secouristeSelect.appendChild(option);
+                    secouristeSelect.appendChild(option);
                 });
                 hideLoading();
             })
@@ -65,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading();
         const range = 'Catalogue (lecture seule)!A4:I1000';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-        
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -74,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const option = document.createElement('option');
                     option.value = `${article[0]} - ${article[1]}€`;
                     option.textContent = `${article[0]} - ${article[1]}€`;
-                    DOMElements.articleSelect.appendChild(option);
+                    articleSelect.appendChild(option);
                 });
                 hideLoading();
             })
@@ -85,36 +110,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function mettreAJourSousTotal() {
-        const article = DOMElements.articleSelect.value;
-        const quantite = parseInt(DOMElements.quantiteInput.value);
+        const article = articleSelect.value;
+        const quantite = parseInt(quantiteInput.value);
         const prix = parseFloat(article.split(' - ')[1].replace('€', '').replace(',', '.'));
         const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
-        DOMElements.sousTotal.textContent = `Sous-total: ${sousTotalCalcul.toFixed(2)}€`;
+        sousTotal.textContent = `Sous-total: ${sousTotalCalcul.toFixed(2)}€`;
     }
 
     function ajouterAuPanier() {
-    const article = DOMElements.articleSelect.value.split(' - ')[0];
-    const taille = DOMElements.tailleInput.value;
-    const couleur = DOMElements.couleurInput.value;
-    const quantite = parseInt(DOMElements.quantiteInput.value);
-    const prix = parseFloat(DOMElements.articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
-    const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
+        const article = articleSelect.value.split(' - ')[0];
+        const taille = tailleInput.value;
+        const couleur = couleurInput.value;
+        const quantite = parseInt(quantiteInput.value);
+        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
 
-    if (article && quantite) {
-        panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
-        DOMElements.panierCount.textContent = panier.length;
-        savePanier(DOMElements.secouristeSelect.value, panier); // Sauvegarder le panier dans le localStorage
-        ajouterCommande(DOMElements.secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
-        afficherPanier();
-        mettreAJourMontants();
-        reinitialiserChamps();
-    } else {
-        console.log('L\'article et la quantité sont obligatoires');
+        if (article && quantite) {
+            panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
+            panierCount.textContent = panier.length;
+            savePanier(secouristeSelect.value, panier);
+            ajouterCommande(secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
+            afficherPanier();
+            mettreAJourMontants();
+            reinitialiserChamps();
+        } else {
+            console.log('L\'article et la quantité sont obligatoires');
+        }
     }
-}
 
     function afficherPanier() {
-        DOMElements.commandeRecap.innerHTML = panier.map((item, index) => `
+        commandeRecap.innerHTML = panier.map((item, index) => `
             <div>
                 ${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal.toFixed(2)}€
                 <button onclick="supprimerArticle(${index})">🗑️</button>
@@ -124,17 +149,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function supprimerArticle(index) {
         panier.splice(index, 1);
-        DOMElements.panierCount.textContent = panier.length;
+        panierCount.textContent = panier.length;
         afficherPanier();
         mettreAJourMontants();
     }
 
     function mettreAJourMontants() {
         const total = panier.reduce((acc, item) => acc + parseFloat(item.sousTotal), 0);
-        DOMElements.totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
+        totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
         const remaining = montantInitial - total;
-        DOMElements.remainingAmount.textContent = `Montant disponible: ${remaining.toFixed(2)}€`;
-        DOMElements.remainingAmount.className = remaining >= 0 ? 'positive' : 'negative';
+        remainingAmount.textContent = `Montant disponible: ${remaining.toFixed(2)}€`;
+        remainingAmount.className = remaining >= 0 ? 'positive' : 'negative';
     }
 
     function validerCommande() {
@@ -146,25 +171,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function ajouterCommande(secouriste, article, taille, couleur, prix, quantite, sousTotal) {
         const range = 'Commande!A1';
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
         const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', prix.toFixed(2), quantite]];
         const body = { values };
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ range, majorDimension: "ROWS", values })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errorInfo => {
-                    throw new Error(`Erreur ${response.status}: ${errorInfo.error.message}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => console.log('Commande ajoutée:', data))
-        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+        gapi.client.sheets.spreadsheets.values.append({
+            spreadsheetId: SPREADSHEET_ID,
+            range: range,
+            valueInputOption: 'USER_ENTERED',
+            resource: { values: body.values }
+        }).then(function(response) {
+            console.log('Commande ajoutée:', response);
+        }, function(error) {
+            console.error('Erreur lors de l\'ajout de la commande:', error);
+        });
     }
 
     function chargerMontantOctroye(secouriste) {
@@ -178,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const secouristeTrouve = secouristes.find(s => s[0] === secouriste);
                 if (secouristeTrouve) {
                     montantInitial = parseFloat(secouristeTrouve[1].replace(',', '.'));
-                    DOMElements.montantOctroye.textContent = `Montant octroyé: ${montantInitial.toFixed(2)}€`;
+                    montantOctroye.textContent = `Montant octroyé: ${montantInitial.toFixed(2)}€`;
                     mettreAJourMontants();
                 }
             })
@@ -201,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         quantite: parseInt(commande[5]),
                         sousTotal: parseFloat(commande[4]) * parseInt(commande[5])
                     }));
-                    DOMElements.panierCount.textContent = panier.length;
+                    panierCount.textContent = panier.length;
                     afficherPanier();
                     mettreAJourMontants();
                 }
@@ -209,46 +228,46 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Erreur lors du chargement des commandes:', error));
     }
 
-    DOMElements.ajouterAuPanier.addEventListener('click', ajouterAuPanier);
-    DOMElements.validerCommande.addEventListener('click', validerCommande);
-    DOMElements.secouristeSelect.addEventListener('change', function() {
-    const secouriste = this.value;
-    if (secouriste) {
-        panier = loadPanier(secouriste); // Charger le panier depuis le localStorage
-        chargerMontantOctroye(secouriste);
-        chargerCommandes(secouriste);
-    } else {
-        DOMElements.montantOctroye.textContent = '';
-        panier = [];
-        DOMElements.panierCount.textContent = 0;
-        DOMElements.totalAmount.textContent = 'Total: 0€';
-        DOMElements.remainingAmount.textContent = 'Montant disponible: 0€';
-        DOMElements.remainingAmount.className = '';
-        DOMElements.commandeRecap.innerHTML = '';
+    function savePanier(secouriste, panier) {
+        localStorage.setItem(secouriste, JSON.stringify(panier));
     }
-});
+
+    function loadPanier(secouriste) {
+        const panier = localStorage.getItem(secouriste);
+        return panier ? JSON.parse(panier) : [];
+    }
+
+    secouristeSelect.addEventListener('change', function() {
+        const secouriste = this.value;
+        if (secouriste) {
+            panier = loadPanier(secouriste);
+            chargerMontantOctroye(secouriste);
+            chargerCommandes(secouriste);
+        } else {
+            montantOctroye.textContent = '';
+            panier = [];
+            panierCount.textContent = 0;
+            totalAmount.textContent = 'Total: 0€';
+            remainingAmount.textContent = 'Montant disponible: 0€';
+            remainingAmount.className = '';
+            commandeRecap.innerHTML = '';
+        }
+    });
+
+    ajouterAuPanier.addEventListener('click', ajouterAuPanier);
+    validerCommande.addEventListener('click', validerCommande);
 
     for (let i = 2; i <= 50; i++) {
         const option = document.createElement('option');
         option.value = i;
         option.textContent = i;
-        DOMElements.quantiteInput.appendChild(option);
+        quantiteInput.appendChild(option);
     }
 
-    DOMElements.quantiteInput.addEventListener('change', mettreAJourSousTotal);
-    DOMElements.articleSelect.addEventListener('change', mettreAJourSousTotal);
+    quantiteInput.addEventListener('change', mettreAJourSousTotal);
+    articleSelect.addEventListener('change', mettreAJourSousTotal);
+
     reinitialiserChamps();
     chargerSecouristes();
     chargerArticles();
 });
-
-// Fonction pour sauvegarder le panier dans le localStorage
-function savePanier(secouriste, panier) {
-    localStorage.setItem(secouriste, JSON.stringify(panier));
-}
-
-// Fonction pour charger le panier depuis le localStorage
-function loadPanier(secouriste) {
-    const panier = localStorage.getItem(secouriste);
-    return panier ? JSON.parse(panier) : [];
-}
