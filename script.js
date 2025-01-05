@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const articles = data.values;
                 articles.forEach(article => {
                     const option = document.createElement('option');
-                    option.value = article[0]; // Nom de l'article
+                    option.value = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
                     articleSelect.appendChild(option);
                 });
@@ -83,17 +83,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function mettreAJourSousTotal() {
         const article = articleSelect.value;
         const quantite = parseInt(quantiteInput.value);
-        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+        const prix = parseFloat(article.split(' - ')[1].replace('€', '')); // Extraire le prix et le convertir en nombre
         const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
         sousTotal.textContent = `Sous-total: ${sousTotalCalcul}€`;
     }
 
     ajouterAuPanier.addEventListener('click', function() {
-        const article = articleSelect.value;
+        const article = articleSelect.value.split(' - ')[0]; // Extract article name
         const taille = document.getElementById('tailleInput').value;
         const couleur = document.getElementById('couleurInput').value;
         const quantite = parseInt(quantiteInput.value);
-        const prix = articleSelect.options[articleSelect.selectedIndex].text.split(' - ')[1].replace('€', '');
+        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '')); // Extract and parse price
         const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite).toFixed(2);  // Fix NaN issue
 
         if (article && quantite) {
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
         const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADHSEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
         const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
         const body = { values };
