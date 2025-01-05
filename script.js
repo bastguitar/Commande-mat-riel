@@ -116,7 +116,59 @@ document.addEventListener('DOMContentLoaded', function() {
   reinitialiserChamps();
 
   // Appeler la fonction Google Apps Script pour enregistrer la commande
-  const url = 'https://script.google.com/macros/s/TON_ID_SCRIPT/exec'; // Remplacer par l'ID de ton script
+  const url = 'ajouterAuPanier.addEventListener('click', function() {
+  // Récupérer les données du formulaire
+  const secouriste = secouristeSelect.value;
+  const article = articleSelect.value.split(' - ')[0];
+  const taille = document.getElementById('tailleInput').value;
+  const couleur = document.getElementById('couleurInput').value;
+  const quantite = parseInt(quantiteInput.value);
+  const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
+  const sousTotal = prix * quantite;
+
+  // Ajouter l'article au panier
+  panier.push({
+    secouriste,
+    article,
+    taille,
+    couleur,
+    quantite,
+    sousTotal
+  });
+
+  // Mettre à jour l'affichage du panier et les totaux
+  afficherPanier();
+  mettreAJourMontants();
+
+  // Réinitialiser le formulaire
+  reinitialiserChamps();
+
+  // Appeler la fonction Google Apps Script pour enregistrer la commande
+  const url = 'https://script.google.com/macros/s/AKfycbzzM_dYWv2X2AGTMRnmC4MRTtV6hP455JY6wkGkP0YL13dY0iqhXEcSZ0oxzVVve-sn0w/exec'; // Remplacer par l'ID de ton script
+  const params = {
+    secouriste,
+    article,
+    taille,
+    couleur,
+    prix,
+    quantite,
+    sousTotal
+  };
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(params)
+  })
+  .then(response => {
+    if (!response.ok) {
+      console.error('Erreur lors de l\'ajout de la commande:', response);
+    } else {
+      console.log('Commande ajoutée avec succès');
+    }
+  })
+  .catch(error => console.error('Erreur:', error));
+});'; // Remplacer par l'ID de ton script
   const params = {
     secouriste,
     article,
