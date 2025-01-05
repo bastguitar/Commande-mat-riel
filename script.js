@@ -152,6 +152,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+    // Mettre à jour l'affichage du panier et les totaux
+    afficherPanier();
+    mettreAJourMontants();
+
+    // Réinitialiser le formulaire
+    reinitialiserChamps();
+
+    // Afficher un message de chargement
+    showLoading();
+
+    // Appeler la fonction Google Apps Script pour enregistrer la commande
+    const url = 'https://script.google.com/macros/s/TON_ID_SCRIPT/exec'; // Remplacer par l'ID de ton script
+    const params = {
+      secouriste,
+      article,
+      taille,
+      couleur,
+      prix,
+      quantite,
+      sousTotal
+    };
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(params)
+    })
+    .then(response => {
+      hideLoading();
+      if (!response.ok) {
+        console.error('Erreur lors de l\'ajout de la commande:', response);
+        alert('Une erreur est survenue lors de l\'ajout de la commande. Veuillez réessayer.');
+      } else {
+        console.log('Commande ajoutée avec succès');
+        alert('Commande ajoutée avec succès !');
+      }
+    })
+    .catch(error => {
+      hideLoading();
+      console.error('Erreur:', error);
+      alert('Une erreur inattendue est survenue. Veuillez réessayer plus tard.');
+    });
+  });
+
   // Mettre à jour l'affichage du panier et les totaux
   afficherPanier();
   mettreAJourMontants();
