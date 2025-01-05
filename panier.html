@@ -4,54 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panier des secouristes</title>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const params = new URLSearchParams(window.location.search);
-            const secouriste = params.get('secouriste');
-
-            document.getElementById('secouristeName').textContent = secouriste;
-
-            const panier = JSON.parse(localStorage.getItem(secouriste)) || [];
-
-            if (panier.length === 0) {
-                document.getElementById('panierContent').innerHTML = '<p>Le panier est vide.</p>';
-                return;
-            }
-
-            const table = document.createElement('table');
-            const thead = document.createElement('thead');
-            const tbody = document.createElement('tbody');
-
-            thead.innerHTML = `
-                <tr>
-                    <th>Article</th>
-                    <th>Taille</th>
-                    <th>Couleur</th>
-                    <th>Quantité</th>
-                    <th>Sous-total</th>
-                </tr>
-            `;
-
-            panier.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.article}</td>
-                    <td>${item.taille || 'N/A'}</td>
-                    <td>${item.couleur || 'N/A'}</td>
-                    <td>${item.quantite}</td>
-                    <td>${item.sousTotal.toFixed(2)}€</td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            table.appendChild(thead);
-            table.appendChild(tbody);
-            document.getElementById('panierContent').appendChild(table);
-        });
-    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="panier.js" defer></script>
 </head>
 <body>
-    <h1>Panier de <span id="secouristeName"></span></h1>
-    <div id="panierContent"></div>
+    <h1 style="text-align: center; font-weight: bold;">Panier des secouristes</h1>
+    <div id="paniersSecouristes"></div>
+    <button id="telechargerRécap" class="valider-button">Télécharger le récapitulatif</button>
 </body>
 </html>

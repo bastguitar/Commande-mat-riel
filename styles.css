@@ -94,3 +94,24 @@ h1 {
     background-color: red;
     color: white;
 }
+
+/* Ajouter ces styles pour la page panier */
+#paniersSecouristes {
+    margin-top: 20px;
+}
+
+#paniersSecouristes div {
+    margin-bottom: 20px;
+}
+
+#paniersSecouristes h2 {
+    margin-bottom: 10px;
+}
+
+#paniersSecouristes div div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
