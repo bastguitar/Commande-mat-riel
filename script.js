@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             panier.push({ article, taille, couleur, quantite, sousTotal: sousTotalCalcul });
             panierCount.textContent = panier.length;
 
-            ajouterCommande(secouristeSelect.value, article, taille, couleur, quantite, sousTotalCalcul);
+            ajouterCommande(secouristeSelect.value, article, taille, couleur, prix, quantite, sousTotalCalcul);
 
             afficherPanier();
             mettreAJourMontants();
@@ -142,11 +142,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
+    function ajouterCommande(secouriste, article, taille, couleur, prix, quantite, sousTotal) {
         const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal.toFixed(2)]];
+        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', prix.toFixed(2), quantite]];
         const body = { values };
 
         fetch(url, {
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function chargerCommandes(secouriste) {
-        const range = 'Commande!A2:G';
+        const range = 'Commande!A2:F';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
         fetch(url)
@@ -211,8 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         article: commande[1],
                         taille: commande[2],
                         couleur: commande[3],
-                        quantite: parseInt(commande[4]),
-                        sousTotal: parseFloat(commande[5].replace(',', '.'))
+                        quantite: parseInt(commande[5]),
+                        sousTotal: parseFloat(commande[4]) * parseInt(commande[5])
                     }));
                     panierCount.textContent = panier.length;
                     afficherPanier();
