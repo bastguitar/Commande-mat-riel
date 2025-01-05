@@ -143,26 +143,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function ajouterCommande(secouriste, article, taille, couleur, prix, quantite, sousTotal) {
-        const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
-        const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', prix.toFixed(2), quantite]];
-        const body = { values };
+    const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', prix.toFixed(2), quantite]];
+    const body = { values };
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => console.log('Commande ajoutée:', data))
-        .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-    }
+    console.log('Données envoyées à Google Sheets:', body);
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ range, majorDimension: "ROWS", values })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorInfo => { 
+                throw new Error(`Erreur ${response.status}: ${errorInfo.error.message}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => console.log('Commande ajoutée:', data))
+    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
+}
 
     function chargerMontantOctroye(secouriste) {
         const range = 'Attribution budget secouristes!B10:C36';
