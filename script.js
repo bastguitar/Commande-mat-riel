@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function ajouterCommande(secouriste, article, taille, couleur, quantite, sousTotal) {
         const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADHSEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
         const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', quantite, sousTotal]];
         const body = { values };
