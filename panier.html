@@ -8,11 +8,50 @@
         document.addEventListener('DOMContentLoaded', function() {
             const params = new URLSearchParams(window.location.search);
             const secouriste = params.get('secouriste');
+
+            // Afficher le nom du secouriste
+            document.getElementById('secouristeName').textContent = secouriste;
+
+            // Charger le panier depuis le localStorage
             const panier = JSON.parse(localStorage.getItem(secouriste)) || [];
 
-            document.getElementById('panierContent').innerHTML = panier.map(item => `
-                <div>${item.article} - ${item.taille || 'N/A'} - ${item.couleur || 'N/A'} - ${item.quantite} - ${item.sousTotal.toFixed(2)}€</div>
-            `).join('');
+            // Vérifiez si le panier est vide
+            if (panier.length === 0) {
+                document.getElementById('panierContent').innerHTML = '<p>Le panier est vide.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Add table headers
+            thead.innerHTML = `
+                <tr>
+                    <th>Article</th>
+                    <th>Taille</th>
+                    <th>Couleur</th>
+                    <th>Quantité</th>
+                    <th>Sous-total</th>
+                </tr>
+            `;
+
+            // Add table rows
+            panier.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.article}</td>
+                    <td>${item.taille || 'N/A'}</td>
+                    <td>${item.couleur || 'N/A'}</td>
+                    <td>${item.quantite}</td>
+                    <td>${item.sousTotal.toFixed(2)}€</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            document.getElementById('panierContent').appendChild(table);
         });
     </script>
 </head>
