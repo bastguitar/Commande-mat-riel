@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const API_KEY = 'AIzaSyBI53kKrn_o6Yd5oo4zRlOC7j36OnW1ZX0';
 
     let panier = [];
-    let montantInitial = 0;
 
     function showLoading() {
         loading.style.display = 'block';
@@ -29,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function reinitialiserChamps() {
         document.getElementById('tailleInput').value = '';
         document.getElementById('couleurInput').value = '';
-        document.getElementById('quantiteInput').value = 1;
+        quantiteInput.value = 1;
         sousTotal.textContent = 'Sous-total: 0€';
-        articleSelect.selectedIndex = 0;  // Reset article selection
+        articleSelect.selectedIndex = 0;
     }
 
     function chargerSecouristes() {
@@ -42,11 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                const secouristes = data.values;
+                const secouristes = data.values || [];
                 secouristes.forEach(secouriste => {
                     const option = document.createElement('option');
-                    option.value = secouriste[0]; // Nom du secouriste
-                    option.textContent = secouriste[0]; // Nom uniquement
+                    option.value = secouriste[0];
+                    option.textContent = secouriste[0];
                     secouristeSelect.appendChild(option);
                 });
                 hideLoading();
@@ -65,11 +64,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                const articles = data.values;
+                const articles = data.values || [];
                 articles.forEach(article => {
                     const option = document.createElement('option');
-                    option.value = `${article[0]} - ${article[1]}€`; // Nom + Prix
-                    option.textContent = `${article[0]} - ${article[1]}€`; // Nom + Prix
+                    option.value = `${article[0]} - ${article[1]}€`;
+                    option.textContent = `${article[0]} - ${article[1]}€`;
                     articleSelect.appendChild(option);
                 });
                 hideLoading();
@@ -83,204 +82,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function mettreAJourSousTotal() {
         const article = articleSelect.value;
         const quantite = parseInt(quantiteInput.value);
-        const prix = parseFloat(article.split(' - ')[1].replace('€', '').replace(',', '.')); // Extraire le prix et le convertir en nombre
-        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);  // Fix NaN issue
+        const prix = parseFloat(article.split(' - ')[1].replace('€', '').replace(',', '.'));
+        const sousTotalCalcul = isNaN(prix) ? 0 : (prix * quantite);
         sousTotal.textContent = `Sous-total: ${sousTotalCalcul.toFixed(2)}€`;
     }
 
     ajouterAuPanier.addEventListener('click', function() {
-    // Récupérer les données du formulaire
-    const secouriste = secouristeSelect.value;
-    const article = articleSelect.value.split(' - ')[0];
-    const taille = document.getElementById('tailleInput').value;
-    const couleur = document.getElementById('couleurInput').value;
-    const quantite = parseInt(quantiteInput.value);
-    const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
-    const sousTotal = prix * quantite;
+        const secouriste = secouristeSelect.value;
+        const article = articleSelect.value.split(' - ')[0];
+        const taille = document.getElementById('tailleInput').value;
+        const couleur = document.getElementById('couleurInput').value;
+        const quantite = parseInt(quantiteInput.value);
+        const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
+        const sousTotal = prix * quantite;
 
-    // Ajouter l'article au panier
-    panier.push({
-      secouriste,
-      article,
-      taille,
-      couleur,
-      quantite,
-      sousTotal
+        panier.push({ secouriste, article, taille, couleur, quantite, sousTotal });
+        afficherPanier();
+        reinitialiserChamps();
     });
-
-    // Mettre à jour l'affichage du panier et les totaux
-    afficherPanier();
-    mettreAJourMontants();
-
-    // Réinitialiser le formulaire
-    reinitialiserChamps();
-
-    // Afficher un message de chargement
-    showLoading();
-
-    // Appeler la fonction Google Apps Script pour enregistrer la commande
-    const url = 'https://script.google.com/macros/s/TON_ID_SCRIPT/exec'; // Remplacer par l'ID de ton script
-    const params = {
-      secouriste,
-      article,
-      taille,
-      couleur,
-      prix,
-      quantite,
-      sousTotal
-    };
-
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(params)
-    })
-    .then(response => {
-      hideLoading();
-      if (!response.ok) {
-        console.error('Erreur lors de l\'ajout de la commande:', response);
-        alert('Une erreur est survenue lors de l\'ajout de la commande. Veuillez réessayer.');
-      } else {
-        console.log('Commande ajoutée avec succès');
-        alert('Commande ajoutée avec succès !');
-      }
-    })
-    .catch(error => {
-      hideLoading();
-      console.error('Erreur:', error);
-      alert('Une erreur inattendue est survenue. Veuillez réessayer plus tard.');
-    });
-  });
-
-    // Mettre à jour l'affichage du panier et les totaux
-    afficherPanier();
-    mettreAJourMontants();
-
-    // Réinitialiser le formulaire
-    reinitialiserChamps();
-
-    // Afficher un message de chargement
-    showLoading();
-
-    // Appeler la fonction Google Apps Script pour enregistrer la commande
-    const url = 'https://script.google.com/macros/s/TON_ID_SCRIPT/exec'; // Remplacer par l'ID de ton script
-    const params = {
-      secouriste,
-      article,
-      taille,
-      couleur,
-      prix,
-      quantite,
-      sousTotal
-    };
-
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(params)
-    })
-    .then(response => {
-      hideLoading();
-      if (!response.ok) {
-        console.error('Erreur lors de l\'ajout de la commande:', response);
-        alert('Une erreur est survenue lors de l\'ajout de la commande. Veuillez réessayer.');
-      } else {
-        console.log('Commande ajoutée avec succès');
-        alert('Commande ajoutée avec succès !');
-      }
-    })
-    .catch(error => {
-      hideLoading();
-      console.error('Erreur:', error);
-      alert('Une erreur inattendue est survenue. Veuillez réessayer plus tard.');
-    });
-  });
-
-  // Mettre à jour l'affichage du panier et les totaux
-  afficherPanier();
-  mettreAJourMontants();
-
-  // Réinitialiser le formulaire
-  reinitialiserChamps();
-
-  // Appeler la fonction Google Apps Script pour enregistrer la commande
-  const url = 'ajouterAuPanier.addEventListener('click', function() {
-  // Récupérer les données du formulaire
-  const secouriste = secouristeSelect.value;
-  const article = articleSelect.value.split(' - ')[0];
-  const taille = document.getElementById('tailleInput').value;
-  const couleur = document.getElementById('couleurInput').value;
-  const quantite = parseInt(quantiteInput.value);
-  const prix = parseFloat(articleSelect.value.split(' - ')[1].replace('€', '').replace(',', '.'));
-  const sousTotal = prix * quantite;
-
-  // Ajouter l'article au panier
-  panier.push({
-    secouriste,
-    article,
-    taille,
-    couleur,
-    quantite,
-    sousTotal
-  });
-
-  // Mettre à jour l'affichage du panier et les totaux
-  afficherPanier();
-  mettreAJourMontants();
-
-  // Réinitialiser le formulaire
-  reinitialiserChamps();
-
-  // Appeler la fonction Google Apps Script pour enregistrer la commande
-  const url = 'https://script.google.com/macros/s/AKfycbyX9Sc-LlJBl2pwNZorLXFgwU47KIjIiV2qA1PSjLTsZp4SrOYaEOFpsYHRA7WIQhsvyg/exec'; // Remplacer par l'ID de ton script
-  const params = {
-    secouriste,
-    article,
-    taille,
-    couleur,
-    prix,
-    quantite,
-    sousTotal
-  };
-
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(params)
-  })
-  .then(response => {
-    if (!response.ok) {
-      console.error('Erreur lors de l\'ajout de la commande:', response);
-    } else {
-      console.log('Commande ajoutée avec succès');
-    }
-  })
-  .catch(error => console.error('Erreur:', error));
-});'; // Remplacer par l'ID de ton script
-  const params = {
-    secouriste,
-    article,
-    taille,
-    couleur,
-    prix,
-    quantite,
-    sousTotal
-  };
-
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(params)
-  })
-  .then(response => {
-    if (!response.ok) {
-      console.error('Erreur lors de l\'ajout de la commande:', response);
-    } else {
-      console.log('Commande ajoutée avec succès');
-    }
-  })
-  .catch(error => console.error('Erreur:', error));
-});
 
     function afficherPanier() {
         commandeRecap.innerHTML = panier.map((item, index) => `
@@ -293,122 +112,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.supprimerArticle = function(index) {
         panier.splice(index, 1);
-        panierCount.textContent = panier.length;
         afficherPanier();
-        mettreAJourMontants();
     };
-
-    function mettreAJourMontants() {
-        const total = panier.reduce((acc, item) => acc + parseFloat(item.sousTotal), 0);
-        totalAmount.textContent = `Total: ${total.toFixed(2)}€`;
-        const remaining = montantInitial - total;
-        remainingAmount.textContent = `Montant disponible: ${remaining.toFixed(2)}€`;
-        remainingAmount.className = remaining >= 0 ? 'positive' : 'negative';  // Apply class based on amount
-    }
-
-    validerCommande.addEventListener('click', function() {
-        if (confirm('Êtes-vous sûr de valider votre commande ?')) {
-            alert('Commande validée !');
-            window.location.href = 'https://sites.google.com/view/commande-materiel/accueil?authuser=0';
-        }
-    });
-
-    function ajouterCommande(secouriste, article, taille, couleur, prix, quantite, sousTotal) {
-    const range = 'Commande!A1'; // Plage de départ (peut être A1 même si la feuille est vide)
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-
-    const values = [[secouriste, article, taille || 'N/A', couleur || 'N/A', prix.toFixed(2), quantite]];
-    const body = { values };
-
-    console.log('Données envoyées à Google Sheets:', body);
-
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ range, majorDimension: "ROWS", values })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorInfo => { 
-                throw new Error(`Erreur ${response.status}: ${errorInfo.error.message}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => console.log('Commande ajoutée:', data))
-    .catch(error => console.error('Erreur lors de l\'ajout de la commande:', error));
-}
-
-    function chargerMontantOctroye(secouriste) {
-        const range = 'Attribution budget secouristes!B10:C36';
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const secouristes = data.values;
-                const secouristeTrouve = secouristes.find(s => s[0] === secouriste);
-                if (secouristeTrouve) {
-                    montantInitial = parseFloat(secouristeTrouve[1].replace(',', '.')); // Montant octroyé
-                    montantOctroye.textContent = `Montant octroyé: ${montantInitial.toFixed(2)}€`;
-                    mettreAJourMontants(); // Mettre à jour le montant disponible
-                }
-            })
-            .catch(error => console.error('Erreur lors du chargement du montant octroyé:', error));
-    }
-
-    secouristeSelect.addEventListener('change', function() {
-        const secouriste = this.value;
-        if (secouriste) {
-            chargerMontantOctroye(secouriste);
-            chargerCommandes(secouriste);
-        } else {
-            montantOctroye.textContent = '';
-            panier = [];
-            panierCount.textContent = 0;
-            totalAmount.textContent = 'Total: 0€';
-            remainingAmount.textContent = 'Montant disponible: 0€';
-            remainingAmount.className = '';  // Reset class
-            commandeRecap.innerHTML = '';
-        }
-    });
-
-    function chargerCommandes(secouriste) {
-        const range = 'Commande!A2:F';
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.values) {
-                    const commandes = data.values.filter(commande => commande[0] === secouriste);
-                    panier = commandes.map(commande => ({
-                        article: commande[1],
-                        taille: commande[2],
-                        couleur: commande[3],
-                        quantite: parseInt(commande[5]),
-                        sousTotal: parseFloat(commande[4]) * parseInt(commande[5])
-                    }));
-                    panierCount.textContent = panier.length;
-                    afficherPanier();
-                    mettreAJourMontants();
-                }
-            })
-            .catch(error => console.error('Erreur lors du chargement des commandes:', error));
-    }
 
     chargerSecouristes();
     chargerArticles();
 
-    for (let i = 2; i <= 50; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        quantiteInput.appendChild(option);
-    }
-
-    quantiteInput.addEventListener('change', mettreAJourSousTotal);
+    quantiteInput.addEventListener('input', mettreAJourSousTotal);
     articleSelect.addEventListener('change', mettreAJourSousTotal);
-
-    reinitialiserChamps();
 });
